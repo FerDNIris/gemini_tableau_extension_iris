@@ -4,8 +4,8 @@ db_schema: {}
 dependencies:
 - app_id: 4WJSBYGUAK63RAJO
   version: {version_tag: v1.0.0}
-metadata: {title: Tableau Extension Demo}
-name: Tableau Extension Demo (working)
+metadata: {title: Gemini App for Tableau}
+name: Gemini Tableau Extension
 native_deps: {head_html: ''}
 package_name: Tableau_Extension
 runtime_options:
@@ -15,9 +15,9 @@ runtime_options:
   server_version: python3-full
   version: 2
 secrets:
-  GEMINI_API:
+  gemini_api_key:
     type: secret
-    value: {QWAAODCYEVD7JSW5: lUCQSzmSjTDo98Eo/oB091Xqy+5eVjdXfYw1jPmsLhcX0aCC4ax+LNoDLhwGj5yNc2bEne8HlgtamSRBVYh5rmoGvFnaWQ+lJHrRFwt2xJNhEt9qmTf1ubSyAQbhHplgJinPHCpckzVgXiqYV+IX7LkmDfwHkJ+dOhbCU1ln0z/UJrTCpEU=}
+    value: {B2QPIWBKR36NYYB3: zHrZCUnQJKsM9KuxIHB0ADkCACvA/eANf7dFpZyM7eCCRhcXjpDBYAGIKF2dRDcbRCoDL21aRUbywOmjsy9GFcj3DdydOADPpK7nl3P6FtgcV9xXahaDuqZHpx3v3IZSvwIJDOKSTNv+gXmg5Q6fAvbL1YHiOLGQXDAnTp3oncAnPNPNsag=, QWAAODCYEVD7JSW5: lUCQSzmSjTDo98Eo/oB091Xqy+5eVjdXfYw1jPmsLhcX0aCC4ax+LNoDLhwGj5yNc2bEne8HlgtamSRBVYh5rmoGvFnaWQ+lJHrRFwt2xJNhEt9qmTf1ubSyAQbhHplgJinPHCpckzVgXiqYV+IX7LkmDfwHkJ+dOhbCU1ln0z/UJrTCpEU=}
 services:
 - client_config: {}
   server_config: {}

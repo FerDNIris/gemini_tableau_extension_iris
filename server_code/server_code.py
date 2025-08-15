@@ -2,7 +2,7 @@ import anvil.secrets
 import anvil.server
 import google.generativeai as genai
 
-GOOGLE_API_KEY = anvil.secrets.get('GOOGLE_API_KEY')
+GOOGLE_API_KEY = anvil.secrets.get_secret('gemini_api_key')
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel(model_name='gemini-1.5-flash', system_instruction=[
         "You are an expert analyst and know everything about data analysis",
