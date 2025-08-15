@@ -1,0 +1,7 @@
+*.pyc
+*.pyo
+__pycache__
+.anvil-data
+*.csv
+*.xlsx
+*.xls
