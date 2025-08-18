@@ -2,6 +2,7 @@ from ._anvil_designer import client_codeTemplate
 from anvil import *
 import anvil.server
 from anvil import tableau
+from trexjacket import tableau as trex_tableau # Import tableau types from trexjacket
 
 from trexjacket.api import get_dashboard
 dashboard = get_dashboard()
@@ -50,10 +51,11 @@ class client_code(client_codeTemplate):
 
     if data_to_send:
         # Determina el número de filas según el tipo de datos
-        if isinstance(data_to_send, list) and all(isinstance(item, tableau.Mark) for item in data_to_send):
+        # Use the types from trexjacket (trex_tableau)
+        if isinstance(data_to_send, list) and all(isinstance(item, trex_tableau.Mark) for item in data_to_send):
             # Si son marcas seleccionadas (lista de objetos Mark)
             row_count = len(data_to_send)
-        elif isinstance(data_to_send, tableau.DataTable):
+        elif isinstance(data_to_send, trex_tableau.DataTable):
             # Si son datos resumidos de una hoja (objeto DataTable)
             row_count = len(data_to_send.data)
 
