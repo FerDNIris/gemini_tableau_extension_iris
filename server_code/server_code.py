@@ -28,7 +28,7 @@ SYSTEM_PROMPT = [
 # Initialize the model to be used by the function.
 # Corrected model name to 'gemini-1.5-flash' as 'gemini-2.5-flash' is not a valid model.
 model = genai.GenerativeModel(
-    model_name='gemini-1.5-flash', 
+    model_name='gemini-2.5-flash', 
     system_instruction=SYSTEM_PROMPT
 )
 
