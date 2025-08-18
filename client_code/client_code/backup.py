@@ -27,36 +27,34 @@ class client_code(client_codeTemplate):
     """This method is called when the button is clicked"""
     data_to_send = self._data
 
-    # Si el usuario no ha seleccionado datos, obtenemos los datos de TODAS las hojas del dashboard.
+    # Si el usuario no ha seleccionado datos, obtenemos los datos de una hoja de trabajo válida
     if not data_to_send:
-        # Esto proporciona un contexto general del dashboard filtrado.
-        Notification("No hay selección. Analizando todas las hojas del dashboard...", timeout=3).show()
-        try:
-            # Este método devuelve un diccionario: {nombre_hoja: DataTable}
-            data_to_send = dashboard.get_summary_data_for_all_worksheets()
-            if not data_to_send:
-                Notification("No se encontraron datos en ninguna hoja del dashboard.", style="warning", timeout=5).show()
-                return
-        except Exception as e:
-            Notification(f"Error al obtener datos de las hojas: {e}", style="danger", timeout=5).show()
+        # Seleccionar la primera hoja de trabajo disponible en el dashboard.        
+        # list(dashboard.worksheets) devuelve una lista de objetos Worksheet, no de nombres.
+        all_worksheets = list(dashboard.worksheets)
+
+        if not all_worksheets:
+            Notification("Error: No se encontraron hojas de trabajo en este dashboard.", style="danger", timeout=5).show()
             return
+
+        # Seleccionamos el primer objeto Worksheet directamente de la lista.
+        worksheet = all_worksheets[0]
+        
+        # get_summary_data() obtiene todos los datos de la hoja, respetando los filtros aplicados.
+        Notification(f"No hay selección. Analizando la primera hoja encontrada: '{worksheet.name}'...", timeout=3).show()
+        data_to_send = worksheet.get_summary_data()
 
     # --- Nueva lógica para advertencia de volumen de datos ---
     MAX_ROWS_THRESHOLD = 3000 # Define el umbral máximo de filas
     row_count = 0
 
     if data_to_send:
-        # Usamos "duck typing" para contar las filas según el tipo de datos.
+        # Usamos "duck typing" para evitar errores de importación con los tipos de Tableau.
+        # get_selected_marks() devuelve una lista.
         if isinstance(data_to_send, list):
-            # Caso 1: Selección de marcas (get_selected_marks).
             row_count = len(data_to_send)
-        elif isinstance(data_to_send, dict):
-            # Caso 2: Datos de todas las hojas (get_summary_data_for_all_worksheets).
-            for table in data_to_send.values():
-                if hasattr(table, 'data') and isinstance(getattr(table, 'data', None), list):
-                    row_count += len(table.data)
+        # get_summary_data() devuelve un objeto con un atributo 'data' que es una lista.
         elif hasattr(data_to_send, 'data') and isinstance(getattr(data_to_send, 'data', None), list):
-            # Caso 3: Datos de una sola hoja (fallback de get_summary_data).
             row_count = len(data_to_send.data)
 
     if row_count > MAX_ROWS_THRESHOLD:
