@@ -49,13 +49,12 @@ class client_code(client_codeTemplate):
     row_count = 0
 
     if data_to_send:
-        # Determina el número de filas según el tipo de datos
-        # Usa los tipos del módulo anvil.tableau (tableau.Mark, tableau.DataTable)
-        if isinstance(data_to_send, list) and all(isinstance(item, tableau.Mark) for item in data_to_send):
-            # Si son marcas seleccionadas (lista de objetos Mark)
+        # Usamos "duck typing" para evitar errores de importación con los tipos de Tableau.
+        # get_selected_marks() devuelve una lista.
+        if isinstance(data_to_send, list):
             row_count = len(data_to_send)
-        elif isinstance(data_to_send, tableau.DataTable):
-            # Si son datos resumidos de una hoja (objeto DataTable)
+        # get_summary_data() devuelve un objeto con un atributo 'data' que es una lista.
+        elif hasattr(data_to_send, 'data') and isinstance(getattr(data_to_send, 'data', None), list):
             row_count = len(data_to_send.data)
 
     if row_count > MAX_ROWS_THRESHOLD:
