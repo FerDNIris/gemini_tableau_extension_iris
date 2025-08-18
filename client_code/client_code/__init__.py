@@ -38,7 +38,8 @@ class client_code(client_codeTemplate):
             for worksheet in dashboard.worksheets:
                 # Obtenemos los datos de cada hoja y los guardamos en un diccionario.
                 summary_data = worksheet.get_summary_data()
-                if summary_data and summary_data.data:
+                # Usamos hasattr para comprobar de forma segura si el objeto tiene el atributo .data
+                if hasattr(summary_data, 'data') and summary_data.data:
                     all_data[worksheet.name] = summary_data
             
             data_to_send = all_data
