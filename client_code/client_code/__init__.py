@@ -32,8 +32,16 @@ class client_code(client_codeTemplate):
         # Esto proporciona un contexto general del dashboard filtrado.
         Notification("No hay selección. Analizando todas las hojas del dashboard...", timeout=3).show()
         try:
-            # Este método devuelve un diccionario: {nombre_hoja: DataTable}
-            data_to_send = dashboard.get_summary_data_for_all_worksheets()
+            # El método 'get_summary_data_for_all_worksheets' no existe.
+            # La forma correcta es iterar sobre cada hoja de cálculo y recopilar sus datos.
+            all_data = {}
+            for worksheet in dashboard.worksheets:
+                # Obtenemos los datos de cada hoja y los guardamos en un diccionario.
+                summary_data = worksheet.get_summary_data()
+                if summary_data and summary_data.data:
+                    all_data[worksheet.name] = summary_data
+            
+            data_to_send = all_data
             if not data_to_send:
                 Notification("No se encontraron datos en ninguna hoja del dashboard.", style="warning", timeout=5).show()
                 return
