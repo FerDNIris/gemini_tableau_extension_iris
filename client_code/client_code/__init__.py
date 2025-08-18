@@ -38,8 +38,10 @@ class client_code(client_codeTemplate):
             for worksheet in dashboard.worksheets:
                 # Obtenemos los datos de cada hoja y los guardamos en un diccionario.
                 summary_data = worksheet.get_summary_data()
-                # Usamos hasattr para comprobar de forma segura si el objeto tiene el atributo .data
-                if hasattr(summary_data, 'data') and summary_data.data:
+                print(summary_data)
+                # Se manejan dos casos: que get_summary_data() devuelva un objeto con atributo .data
+                # o que devuelva directamente una lista de datos (ej. lista de diccionarios).
+                if (hasattr(summary_data, 'data') and summary_data.data) or (isinstance(summary_data, list) and summary_data):
                     all_data[worksheet.name] = summary_data
             
             data_to_send = all_data
@@ -61,10 +63,14 @@ class client_code(client_codeTemplate):
             # Caso 1: Selección de marcas (get_selected_marks).
             row_count = len(data_to_send)
         elif isinstance(data_to_send, dict):
-            # Caso 2: Datos de todas las hojas (get_summary_data_for_all_worksheets).
-            for table in data_to_send.values():
-                if hasattr(table, 'data') and isinstance(getattr(table, 'data', None), list):
-                    row_count += len(table.data)
+            # Caso 2: Datos de todas las hojas.
+            for data_from_sheet in data_to_send.values():
+                # Comprueba si es un objeto tipo DataTable
+                if hasattr(data_from_sheet, 'data') and isinstance(getattr(data_from_sheet, 'data', None), list):
+                    row_count += len(data_from_sheet.data)
+                # Comprueba si es una lista de datos directamente
+                elif isinstance(data_from_sheet, list):
+                    row_count += len(data_from_sheet)
         elif hasattr(data_to_send, 'data') and isinstance(getattr(data_to_send, 'data', None), list):
             # Caso 3: Datos de una sola hoja (fallback de get_summary_data).
             row_count = len(data_to_send.data)
