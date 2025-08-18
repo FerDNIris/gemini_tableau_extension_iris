@@ -7,7 +7,7 @@ import google.generativeai as genai
 # Configure the API once when the server module loads.
 try:
     # Use anvil.secrets.get() and the name of the secret you defined in Anvil.
-    GOOGLE_API_KEY = anvil.secrets.get_secrets('gemini_api_key')
+    GOOGLE_API_KEY = anvil.secrets.get_secret('gemini_api_key')
     if not GOOGLE_API_KEY:
         raise ValueError("The Google API Key ('gemini_api_key') was not found in Anvil Secrets.")
     genai.configure(api_key=GOOGLE_API_KEY)
