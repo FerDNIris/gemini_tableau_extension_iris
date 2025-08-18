@@ -24,5 +24,3 @@ components:
   type: Label
 container: {type: ColumnPanel}
 is_package: true
-
-

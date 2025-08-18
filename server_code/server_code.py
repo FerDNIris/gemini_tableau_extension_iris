@@ -5,7 +5,7 @@ import google.generativeai as genai_old
 from google import genai 
 from google.genai import types 
 
-GOOGLE_API_KEY = anvil.secrets.get('GOOGLE_API_KEY')
+GOOGLE_API_KEY = anvil.secrets.get('gemini_api_key')
 
 client = genai.Client(GOOGLE_API_KEY)
 
