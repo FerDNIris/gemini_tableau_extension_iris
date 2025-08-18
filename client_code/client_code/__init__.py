@@ -2,8 +2,9 @@ from ._anvil_designer import client_codeTemplate
 from anvil import *
 import anvil.server
 from anvil import tableau
-# Los tipos Mark y DataTable se importan directamente desde la API de trexjacket
-from trexjacket.api import get_dashboard, Mark, DataTable
+# Los tipos Mark y DataTable se importan directamente desde el paquete trexjacket
+from trexjacket.api import get_dashboard
+from trexjacket import Mark, DataTable
 dashboard = get_dashboard()
 
 class client_code(client_codeTemplate):
