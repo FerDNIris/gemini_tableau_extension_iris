@@ -50,6 +50,7 @@ class client_code(client_codeTemplate):
             return
 
     # --- Nueva lógica para advertencia de volumen de datos ---
+    ### Para no pasarnos de los tokens
     MAX_ROWS_THRESHOLD = 3000 # Define el umbral máximo de filas
     row_count = 0
 
