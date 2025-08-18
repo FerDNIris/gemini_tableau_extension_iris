@@ -2,9 +2,8 @@ from ._anvil_designer import client_codeTemplate
 from anvil import *
 import anvil.server
 from anvil import tableau
-# Los tipos Mark y DataTable se importan directamente desde el paquete trexjacket
+# Los tipos de Tableau como Mark y DataTable son parte del módulo anvil.tableau
 from trexjacket.api import get_dashboard
-from trexjacket import Mark, DataTable
 dashboard = get_dashboard()
 
 class client_code(client_codeTemplate):
@@ -51,11 +50,11 @@ class client_code(client_codeTemplate):
 
     if data_to_send:
         # Determina el número de filas según el tipo de datos
-        # Usa los tipos Mark y DataTable importados directamente
-        if isinstance(data_to_send, list) and all(isinstance(item, Mark) for item in data_to_send):
+        # Usa los tipos del módulo anvil.tableau (tableau.Mark, tableau.DataTable)
+        if isinstance(data_to_send, list) and all(isinstance(item, tableau.Mark) for item in data_to_send):
             # Si son marcas seleccionadas (lista de objetos Mark)
             row_count = len(data_to_send)
-        elif isinstance(data_to_send, DataTable):
+        elif isinstance(data_to_send, tableau.DataTable):
             # Si son datos resumidos de una hoja (objeto DataTable)
             row_count = len(data_to_send.data)
 
