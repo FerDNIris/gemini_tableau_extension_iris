@@ -30,19 +30,18 @@ class client_code(client_codeTemplate):
     # Si el usuario no ha seleccionado datos, obtenemos los datos de una hoja de trabajo válida
     if not data_to_send:
         # Seleccionar la primera hoja de trabajo disponible en el dashboard.        
-        # Obtenemos la lista de nombres de las hojas de trabajo
-        all_worksheet_names = list(dashboard.worksheets)
+        # list(dashboard.worksheets) devuelve una lista de objetos Worksheet, no de nombres.
+        all_worksheets = list(dashboard.worksheets)
 
-        if not all_worksheet_names:
+        if not all_worksheets:
             Notification("Error: No se encontraron hojas de trabajo en este dashboard.", style="danger", timeout=5).show()
             return
 
-        # Seleccionamos el nombre de la primera hoja de la lista
-        worksheet_name = all_worksheet_names[0] 
-        worksheet = dashboard.worksheets[worksheet_name]
+        # Seleccionamos el primer objeto Worksheet directamente de la lista.
+        worksheet = all_worksheets[0]
         
         # get_summary_data() obtiene todos los datos de la hoja, respetando los filtros aplicados.
-        Notification(f"No hay selección. Analizando la primera hoja encontrada: '{worksheet_name}'...", timeout=3).show()
+        Notification(f"No hay selección. Analizando la primera hoja encontrada: '{worksheet.name}'...", timeout=3).show()
         data_to_send = worksheet.get_summary_data()
 
     # --- Nueva lógica para advertencia de volumen de datos ---
@@ -65,8 +64,7 @@ class client_code(client_codeTemplate):
             f"¿Deseas continuar?"
         )
         # Muestra un cuadro de diálogo de confirmación al usuario
-        if not confirm(warning_message, title="Advertencia de Gran Volumen de Datos filtra más para poder continuar",
-                        buttons=[("Continuar", True), ("Cancelar", False)]):
+        if not confirm(warning_message, title="Advertencia de Gran Volumen de Datos", buttons=[("Continuar", True), ("Cancelar", False)]):
             Notification("Operación cancelada por el usuario.", timeout=2).show()
             return # Detiene la ejecución si el usuario cancela
     # --- Fin de la nueva lógica ---

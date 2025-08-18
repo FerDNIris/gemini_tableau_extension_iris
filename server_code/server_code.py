@@ -25,6 +25,7 @@ system_prompt = [
   ]
 
 
+
 @anvil.server.callable
 def generateDataSummaryOld(prompt, data):
   revised_prompt = f'''
@@ -46,5 +47,7 @@ def generateDataSummary(prompt, data):
     )
   )
   return response.text
+
+
 
 
