@@ -14,7 +14,10 @@ runtime_options:
   server_spec_disabled: {base: python310-minimal, requirements: ''}
   server_version: python3-full
   version: 2
-secrets: {}
+secrets:
+  gemini_api_key:
+    type: secret
+    value: {B2QPIWBKR36NYYB3: Q/PE/HZMAd/4p/lXGM+T8uKB2oYuGqYbznt2oAMs8nLom07QzJi05BrKcIonWvmYPUZHzKkOnxPeA7Y5ADD3vVmEoOw7tsengFHWOTPZZac21vtUKS7+WdnJsgL5x8JfH3yZBRqdwLuYLF6cUhbsFwXOpiBmvzqm/lwezN0So3Khez/thqM=}
 services:
 - client_config: {}
   server_config: {}
