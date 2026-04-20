@@ -17,7 +17,7 @@ runtime_options:
 secrets:
   gemini_api_key:
     type: secret
-    value: {B2QPIWBKR36NYYB3: Q/PE/HZMAd/4p/lXGM+T8uKB2oYuGqYbznt2oAMs8nLom07QzJi05BrKcIonWvmYPUZHzKkOnxPeA7Y5ADD3vVmEoOw7tsengFHWOTPZZac21vtUKS7+WdnJsgL5x8JfH3yZBRqdwLuYLF6cUhbsFwXOpiBmvzqm/lwezN0So3Khez/thqM=}
+    value: {B2QPIWBKR36NYYB3: dJQEsE+bPu2ytoRSLAnukCaai9qlK9gOwxaAMqamVIWy4aOYoaPolmQ3PUdTQH30Avaj1FWgjFryrN0z6M/MBuilRYxJw0YBQQo0yNkSUauEuj+BwqNR2ERhPFbOHWPjLc9AAGQNrkdnpOxXrMUY8X/0zqO1wK5RubjKcIqnZ0qPm9Ud2dk=}
 services:
 - client_config: {}
   server_config: {}
