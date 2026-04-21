@@ -94,8 +94,11 @@ class client_code(client_codeTemplate):
       self.summary.text = dataSummary
       self._data = None 
     except Exception as e:
-      Notification(f'Error detectado {e}')
-    
+      dataSummary = e
+      self.summary.visible = True
+      self.summary.text = dataSummary
+      self._data = None 
+
   def btn_clear_click(self, **event_args):
     """This method is called when the button is clicked"""
     self.summary.text = ''

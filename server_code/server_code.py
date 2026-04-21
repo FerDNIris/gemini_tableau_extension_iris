@@ -36,7 +36,7 @@ old_model = genai.GenerativeModel(
     system_instruction=SYSTEM_PROMPT
 )
 
-selected_model = 'gemma-3-27b'
+selected_model = 'gemini-3.1-flash-lite'
 
 @anvil.server.callable
 def generateDataSummary(prompt, data):
