@@ -1,7 +1,7 @@
 import anvil.secrets
 import anvil.server
-# This is the only import needed for the Gemini API, using the latest library.
-#import google.generativeai as genai
+
+#import google.generativeai as genai ### Old library
 from google import genai
 from google.genai import types
 # --- Global Configuration ---
@@ -36,13 +36,13 @@ old_model = genai.GenerativeModel(
     system_instruction=SYSTEM_PROMPT
 )
 
-selected_model = 'gemini-3.1-flash-lite'
+selected_model = 'gemma-4-31b-it'
 
 @anvil.server.callable
 def generateDataSummary(prompt, data):
   if not prompt:
     return "Error: Please provide a question to analyze the data."
-  if not data:
+  if data.empty:
     return "Error: No data to analyze. Please select data in the Tableau dashboard."
   contents = [
     f"User Question: {prompt}",
@@ -56,13 +56,12 @@ def generateDataSummary(prompt, data):
       config = types.GenerateContentConfig(
         system_instruction=SYSTEM_PROMPT
       )
-    ) 
+    )
     return response.text
   except Exception as e:
     # Safely handle API errors and return a helpful message to the user.
     print(f"An error occurred while calling the Gemini API: {e}")
     return f"Sorry, an error occurred while generating the analysis. Please check the server logs for details. Error: {e}"
-
 
 def old_generateDataSummary(prompt, data):
   """

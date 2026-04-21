@@ -88,6 +88,11 @@ class client_code(client_codeTemplate):
     # --- Fin de la nueva lógica ---
 
     Notification("Procesando, por favor espera...", timeout=2).show()
+    dataSummary = anvil.server.call('generateDataSummary', prompt=self.user_question.text, data=data_to_send)
+    self.summary.visible = True
+    self.summary.text = dataSummary
+    self._data = None 
+    """
     try:
       dataSummary = anvil.server.call('generateDataSummary', prompt=self.user_question.text, data=data_to_send)
       self.summary.visible = True
@@ -98,7 +103,8 @@ class client_code(client_codeTemplate):
       self.summary.visible = True
       self.summary.text = dataSummary
       self._data = None 
-
+    """
+    
   def btn_clear_click(self, **event_args):
     """This method is called when the button is clicked"""
     self.summary.text = ''
