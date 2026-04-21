@@ -39,7 +39,7 @@ old_model = genai.GenerativeModel(
 selected_model = 'gemma-3-27b'
 
 @anvil.server.callable
-def generateDataSummary(prompt, data, model_name= selected_model):
+def generateDataSummary(prompt, data):
   if not prompt:
     return "Error: Please provide a question to analyze the data."
   if not data:
@@ -51,7 +51,7 @@ def generateDataSummary(prompt, data, model_name= selected_model):
   ]
   try:
     response = client.models.generate_content(
-      model = model_name,
+      model = selected_model,
       contents = contents,
       config = types.GenerateContentConfig(
         system_instruction=SYSTEM_PROMPT
