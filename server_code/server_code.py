@@ -1,8 +1,9 @@
 import anvil.secrets
 import anvil.server
 # This is the only import needed for the Gemini API, using the latest library.
-import google.generativeai as genai
-
+#import google.generativeai as genai
+from google import genai
+from google.genai import types
 # --- Global Configuration ---
 # Configure the API once when the server module loads.
 try:
@@ -10,7 +11,8 @@ try:
     GOOGLE_API_KEY = anvil.secrets.get_secret('gemini_api_key')
     if not GOOGLE_API_KEY:
         raise ValueError("The Google API Key ('gemini_api_key') was not found in Anvil Secrets.")
-    genai.configure(api_key=GOOGLE_API_KEY)
+    #genai.configure(api_key=GOOGLE_API_KEY)
+    client = genai.Client(api_key =GOOGLE_API_KEY)
 except Exception as e:
     # This error will be visible in the Anvil server logs.
     print(f"CRITICAL ERROR: Could not configure Google API. The extension will not work. Error: {e}")
@@ -27,15 +29,42 @@ SYSTEM_PROMPT = [
 
 # Initialize the model to be used by the function.
 # Corrected model name to 'gemini-1.5-flash' as 'gemini-2.5-flash' is not a valid model anymore.
-model = genai.GenerativeModel(
+old_model = genai.GenerativeModel(
     #model_name='gemini-2.5-flash-lite', 
     #model_name='gemma-4-26b-a4b-it',
     model_name ='gemma-3-27b',
     system_instruction=SYSTEM_PROMPT
 )
 
+selected_model = 'gemma-3-27b'
+
 @anvil.server.callable
-def generateDataSummary(prompt, data):
+def generateDataSummary(prompt, data, model_name= selected_model):
+  if not prompt:
+    return "Error: Please provide a question to analyze the data."
+  if not data:
+    return "Error: No data to analyze. Please select data in the Tableau dashboard."
+  contents = [
+    f"User Question: {prompt}",
+    "Data for Analysis:",
+    str(data)
+  ]
+  try:
+    response = client.models.generate_content(
+      model = model_name,
+      contents = contents,
+      config = types.GenerateContentConfig(
+        system_instruction=SYSTEM_PROMPT
+      )
+    ) 
+    return response.text
+  except Exception as e:
+    # Safely handle API errors and return a helpful message to the user.
+    print(f"An error occurred while calling the Gemini API: {e}")
+    return f"Sorry, an error occurred while generating the analysis. Please check the server logs for details. Error: {e}"
+
+
+def old_generateDataSummary(prompt, data):
   """
   Generates a data analysis using the Gemini model.
   This is the single, modern, and callable function for the client.
@@ -54,7 +83,7 @@ def generateDataSummary(prompt, data):
   ]
 
   try:
-    response = model.generate_content(contents)
+    response = old_model.generate_content(contents)
     return response.text
   except Exception as e:
     # Safely handle API errors and return a helpful message to the user.
