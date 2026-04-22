@@ -25,6 +25,7 @@ class client_code(client_codeTemplate):
 
   def btn_submit_click(self, **event_args):
     """This method is called when the button is clicked"""
+    ### Este métido se llama cada vez que el botón de pregunta se da click
     data_to_send = self._data
 
     # Si el usuario no ha seleccionado datos, obtenemos los datos de TODAS las hojas del dashboard.

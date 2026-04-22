@@ -29,13 +29,14 @@ SYSTEM_PROMPT = [
 
 # Initialize the model to be used by the function.
 # Corrected model name to 'gemini-1.5-flash' as 'gemini-2.5-flash' is not a valid model anymore.
+"""
 old_model = genai.GenerativeModel(
     #model_name='gemini-2.5-flash-lite', 
     #model_name='gemma-4-26b-a4b-it',
     model_name ='gemma-3-27b',
     system_instruction=SYSTEM_PROMPT
 )
-
+"""
 selected_model = 'gemma-4-31b-it'
 
 @anvil.server.callable
@@ -63,11 +64,8 @@ def generateDataSummary(prompt, data):
     print(f"An error occurred while calling the Gemini API: {e}")
     return f"Sorry, an error occurred while generating the analysis. Please check the server logs for details. Error: {e}"
 
+"""
 def old_generateDataSummary(prompt, data):
-  """
-  Generates a data analysis using the Gemini model.
-  This is the single, modern, and callable function for the client.
-  """
   if not prompt:
       return "Error: Please provide a question to analyze the data."
   if not data:
@@ -88,3 +86,4 @@ def old_generateDataSummary(prompt, data):
     # Safely handle API errors and return a helpful message to the user.
     print(f"An error occurred while calling the Gemini API: {e}")
     return f"Sorry, an error occurred while generating the analysis. Please check the server logs for details. Error: {e}"
+"""
