@@ -10,7 +10,15 @@ class client_code(client_codeTemplate):
   def __init__(self, **properties):
     self.init_components(**properties)
     self._data = None
+    # Initialize loading indicator (assuming it's part of the form design)
+    # Ensure you have a component named 'loading_indicator' in your Anvil form.
+    if hasattr(self, 'loading_indicator'):
+      self.loading_indicator.visible = False
+      self.loading_indicator.text = "Procesando..." # Default text
+    else:
+      print("Warning: loading_indicator component not found in form design. Please add one for better UX.")
     self.summary.visible = False
+    print("Extensión inicializada.")
     dashboard.register_event_handler('selection_changed', self.selection_changed_event_handler)
 
   def selection_changed_event_handler(self, event):
@@ -22,6 +30,28 @@ class client_code(client_codeTemplate):
     else:
       # Si el usuario anula la selección, limpiamos los datos guardados
       self._data = None
+
+  def handle_success(self, result):
+    """Callback for successful server response."""
+    if hasattr(self, 'loading_indicator'):
+      self.loading_indicator.visible = False
+    self.summary.text = result
+    self.summary.visible = True
+    self._data = None # Clear data after use
+    # Optional: Clear user question after successful submission
+    # self.user_question.text = ''
+
+  def handle_error(self, error):
+    """Callback for server error."""
+    if hasattr(self, 'loading_indicator'):
+      self.loading_indicator.visible = False
+    # Check if it's an Anvil TimeoutError specifically
+    if isinstance(error, anvil.server.TimeoutError):
+      self.summary.text = f"La operación tardó demasiado en completarse. Por favor, intenta con menos datos o una pregunta más específica. Error: {str(error)}"
+    else:
+      self.summary.text = f"Ocurrió un error al comunicarse con el servidor:\n{str(error)}"
+    self.summary.visible = True
+    self._data = None # Clear data even on error
 
   def btn_submit_click(self, **event_args):
     """This method is called when the button is clicked"""
@@ -36,10 +66,10 @@ class client_code(client_codeTemplate):
         # El método 'get_summary_data_for_all_worksheets' no existe.
         # La forma correcta es iterar sobre cada hoja de cálculo y recopilar sus datos.
         all_data = {}
-        for worksheet in dashboard.worksheets:
+        for worksheet in dashboard.worksheets: # Iterate through all worksheets
           # Obtenemos los datos de cada hoja y los guardamos en un diccionario.
           summary_data = worksheet.get_summary_data()
-          print(summary_data)
+          # print(summary_data) # Debugging line, can be removed
           # Se manejan dos casos: que get_summary_data() devuelva un objeto con atributo .data
           # o que devuelva directamente una lista de datos (ej. lista de diccionarios).
           if (hasattr(summary_data, 'data') and summary_data.data) or (isinstance(summary_data, list) and summary_data):
@@ -88,28 +118,33 @@ class client_code(client_codeTemplate):
         return # Detiene la ejecución si el usuario cancela
     # --- Fin de la nueva lógica ---
 
-    Notification("Procesando, por favor espera...", timeout=2).show()
-    dataSummary = anvil.server.call('generateDataSummary', prompt=self.user_question.text, data=data_to_send)
-    self.summary.visible = True
-    self.summary.text = dataSummary
-    self._data = None 
-    """
-    try:
-      dataSummary = anvil.server.call('generateDataSummary', prompt=self.user_question.text, data=data_to_send)
-      self.summary.visible = True
-      self.summary.text = dataSummary
-      self._data = None 
-    except Exception as e:
-      dataSummary = e
-      self.summary.visible = True
-      self.summary.text = dataSummary
-      self._data = None 
-    """
+    if not self.user_question.text:
+      Notification("Por favor, ingresa una pregunta antes de analizar los datos.", style="warning", timeout=3).show()
+      return
 
+    # Show loading indicator
+    if hasattr(self, 'loading_indicator'):
+      self.loading_indicator.text = "Procesando, por favor espera..."
+      self.loading_indicator.visible = True
+    self.summary.visible = False # Hide previous summary
+
+    # Make an asynchronous call to the server with an increased timeout
+    anvil.server.call(
+      'generateDataSummary',
+      prompt=self.user_question.text,
+      data=data_to_send,
+      timeout=120 # Set timeout to 120 seconds (2 minutes)
+    ).then(
+      lambda result: self.handle_success(result)
+    ).catch(
+      lambda error: self.handle_error(error)
+    )
   def btn_clear_click(self, **event_args):
     """This method is called when the button is clicked"""
     self.summary.text = ''
     self.user_question.text = ''
     self._data = None
     self.summary.visible = False
+    if hasattr(self, 'loading_indicator'):
+      self.loading_indicator.visible = False
 

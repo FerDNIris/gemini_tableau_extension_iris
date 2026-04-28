@@ -5,6 +5,7 @@ import anvil.server
 from google import genai
 from google.genai import types
 # --- Global Configuration ---
+client = None
 # Configure the API once when the server module loads.
 try:
   # Use anvil.secrets.get() and the name of the secret you defined in Anvil.
@@ -39,8 +40,83 @@ old_model = genai.GenerativeModel(
 """
 selected_model = 'gemma-4-31b-it'
 
+# --- Helper function to format Tableau data for LLM ---
+def format_tableau_data_for_llm(data):
+  """
+    Formats Tableau data (Marks, DataTables, or dict of DataTables) into a concise
+    string representation suitable for LLM input, with truncation for large datasets.
+    """
+  formatted_output = []
+
+  if isinstance(data, list):  # Likely selected marks (list of Mark objects)
+    formatted_output.append("Selected Marks:")
+    if not data:
+      formatted_output.append("  No marks selected.")
+    for i, mark in enumerate(data):
+      formatted_output.append(f"  Mark {i+1}:")
+      if hasattr(mark, 'pairs'):
+        # Extract fieldName and value from each pair
+        mark_details = {pair.fieldName: pair.value for pair in mark.pairs}
+        formatted_output.append(f"    {mark_details}")
+      else:
+        # Fallback if Mark structure is unexpected
+        formatted_output.append(f"    {str(mark)}")
+
+  elif isinstance(data, dict):  # Likely data from multiple worksheets (dict of DataTable objects)
+    formatted_output.append("Data from Multiple Worksheets:")
+    if not data:
+      formatted_output.append("  No data found across worksheets.")
+    for sheet_name, sheet_data in data.items():
+      formatted_output.append(f"  Worksheet: {sheet_name}")
+      if hasattr(sheet_data, 'columns') and hasattr(sheet_data, 'data'): # DataTable object
+        columns = [col.fieldName for col in sheet_data.columns]
+        formatted_output.append(f"    Columns: {columns}")
+        formatted_output.append("    Rows (first 100):")
+        # Limit the number of rows to send to avoid excessive token usage
+        for i, row in enumerate(sheet_data.data[:100]):
+          # Format row as a dictionary for clarity
+          row_dict = {columns[j]: value for j, value in enumerate(row)}
+          formatted_output.append(f"      {row_dict}")
+          if i >= 99:
+            formatted_output.append(f"      ... (truncated, {len(sheet_data.data) - 100} more rows)")
+            break
+        if not sheet_data.data:
+          formatted_output.append("      No rows in this worksheet.")
+      elif isinstance(sheet_data, list): # Simple list of data (e.g., list of dicts)
+        formatted_output.append("    Rows (first 100):")
+        for i, row in enumerate(sheet_data[:100]):
+          formatted_output.append(f"      {row}")
+          if i >= 99:
+            formatted_output.append(f"      ... (truncated, {len(sheet_data) - 100} more rows)")
+            break
+        if not sheet_data:
+          formatted_output.append("      No rows in this worksheet.")
+      else:
+        formatted_output.append(f"    Raw Sheet Data: {str(sheet_data)}") # Fallback for other types
+
+  elif hasattr(data, 'columns') and hasattr(data, 'data'): # Single DataTable object
+    formatted_output.append("Data from Worksheet:")
+    columns = [col.fieldName for col in data.columns]
+    formatted_output.append(f"  Columns: {columns}")
+    formatted_output.append("  Rows (first 100):")
+    for i, row in enumerate(data.data[:100]):
+      row_dict = {columns[j]: value for j, value in enumerate(row)}
+      formatted_output.append(f"    {row_dict}")
+      if i >= 99:
+        formatted_output.append(f"    ... (truncated, {len(data.data) - 100} more rows)")
+        break
+    if not data.data:
+      formatted_output.append("  No rows in this worksheet.")
+
+  else:
+    formatted_output.append(f"Raw Data (unrecognized format): {str(data)}") # Generic fallback
+
+  return "\n".join(formatted_output)
+
 @anvil.server.callable
 def generateDataSummary(prompt, data):
+  if client is None:
+    return "Error: El cliente de la API de Google no se pudo inicializar. Revisa los logs del servidor."
   if not prompt:
     return "Error: Please provide a question to analyze the data."
   if not data:
@@ -48,7 +124,7 @@ def generateDataSummary(prompt, data):
   contents = [
     f"User Question: {prompt}",
     "Data for Analysis:",
-    str(data)
+    format_tableau_data_for_llm(data) # Use the helper function to format data
   ]
   try:
     response = client.models.generate_content(
