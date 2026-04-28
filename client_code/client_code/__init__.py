@@ -133,7 +133,7 @@ class client_code(client_codeTemplate):
       'generateDataSummary',
       prompt=self.user_question.text,
       data=data_to_send,
-      timeout=120 # Set timeout to 120 seconds (2 minutes)
+      # timeout=120 # Removed timeout as it's causing TypeError in server function
     ).then(
       lambda result: self.handle_success(result)
     ).catch(
