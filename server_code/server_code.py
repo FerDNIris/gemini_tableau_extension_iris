@@ -7,15 +7,15 @@ from google.genai import types
 # --- Global Configuration ---
 # Configure the API once when the server module loads.
 try:
-    # Use anvil.secrets.get() and the name of the secret you defined in Anvil.
-    GOOGLE_API_KEY = anvil.secrets.get_secret('gemini_api_key')
-    if not GOOGLE_API_KEY:
-        raise ValueError("The Google API Key ('gemini_api_key') was not found in Anvil Secrets.")
+  # Use anvil.secrets.get() and the name of the secret you defined in Anvil.
+  GOOGLE_API_KEY = anvil.secrets.get_secret('gemini_api_key')
+  if not GOOGLE_API_KEY:
+    raise ValueError("The Google API Key ('gemini_api_key') was not found in Anvil Secrets.")
     #genai.configure(api_key=GOOGLE_API_KEY)
-    client = genai.Client(api_key =GOOGLE_API_KEY)
+  client = genai.Client(api_key = GOOGLE_API_KEY)
 except Exception as e:
-    # This error will be visible in the Anvil server logs.
-    print(f"CRITICAL ERROR: Could not configure Google API. The extension will not work. Error: {e}")
+  # This error will be visible in the Anvil server logs.
+  print(f"CRITICAL ERROR: Could not configure Google API. The extension will not work. Error: {e}")
 
 # --- Model Definition ---
 # Define the system prompt and initialize the model in one place.
@@ -43,7 +43,7 @@ selected_model = 'gemma-4-31b-it'
 def generateDataSummary(prompt, data):
   if not prompt:
     return "Error: Please provide a question to analyze the data."
-  if data.empty:
+  if not data:
     return "Error: No data to analyze. Please select data in the Tableau dashboard."
   contents = [
     f"User Question: {prompt}",
