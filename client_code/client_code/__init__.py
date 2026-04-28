@@ -74,20 +74,23 @@ class client_code(client_codeTemplate):
       self.loading_indicator.text = f"Procesando (Intento {attempt}/3)..."
       self.loading_indicator.visible = True
 
-    server_call_result = anvil.server.call('generateDataSummary', prompt=prompt, data=data_to_send)
+    try:
+      server_call_result = anvil.server.call('generateDataSummary', prompt=prompt, data=data_to_send)
 
-    if hasattr(server_call_result, 'then') and callable(server_call_result.then):
-      server_call_result.then(
-        lambda result: self.handle_success(result)
-      ).catch(
-        lambda error: self.handle_error(error, prompt, data_to_send, attempt)
-      )
-    else:
-      # Si la respuesta no es una promesa, manejamos el resultado directo
-      if isinstance(server_call_result, str) and server_call_result.startswith("Error"):
-        self.handle_error(server_call_result, prompt, data_to_send, attempt)
+      if hasattr(server_call_result, 'then') and callable(server_call_result.then):
+        server_call_result.then(
+          lambda result: self.handle_success(result)
+        ).catch(
+          lambda error: self.handle_error(error, prompt, data_to_send, attempt)
+        )
       else:
-        self.handle_success(server_call_result)
+        # Si la respuesta no es una promesa, manejamos el resultado directo
+        if isinstance(server_call_result, str) and server_call_result.startswith("Error"):
+          self.handle_error(server_call_result, prompt, data_to_send, attempt)
+        else:
+          self.handle_success(server_call_result)
+    except Exception as e:
+      self.handle_error(e, prompt, data_to_send, attempt)
 
   def btn_submit_click(self, **event_args):
     """This method is called when the button is clicked"""

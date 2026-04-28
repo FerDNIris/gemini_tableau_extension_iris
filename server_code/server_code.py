@@ -20,13 +20,11 @@ except Exception as e:
 
 # --- Model Definition ---
 # Define the system prompt and initialize the model in one place.
-SYSTEM_PROMPT = [
-  "You are an expert analyst and know everything about data analysis.",
-  "You can interpret data in any form whether it's a single data point or a list of data with keys",
-  "You are on a mission to provide the best data analysis report when asked",
-  "You are capable of answering the question without report as well on topics that require you to answer between a finite set of possibilities",
-  "You also need to provide all the answers in spanish because the main client using this speaks in this language, Spanish and nothing more "
-]
+SYSTEM_PROMPT = ("You are an expert analyst and know everything about data analysis. "
+                 "You can interpret data in any form whether it's a single data point or a list of data with keys. "
+                 "You are on a mission to provide the best data analysis report when asked. "
+                 "You are capable of answering the question without report as well on topics that require you to answer between a finite set of possibilities. "
+                 "You must provide all the answers in Spanish.")
 
 # Initialize the model to be used by the function.
 # Corrected model name to 'gemini-1.5-flash' as 'gemini-2.5-flash' is not a valid model anymore.
@@ -38,7 +36,10 @@ old_model = genai.GenerativeModel(
     system_instruction=SYSTEM_PROMPT
 )
 """
+model  ='gemini-3.1-flash-lite-preview'
+#selected_model = 'gemini-1.5-flash'
 selected_model = 'gemma-4-31b-it'
+selected_model = model
 
 # --- Helper function to format Tableau data for LLM ---
 def format_tableau_data_for_llm(data):
@@ -114,7 +115,7 @@ def format_tableau_data_for_llm(data):
   return "\n".join(formatted_output)
 
 @anvil.server.callable
-def generateDataSummary(prompt, data):
+def generateDataSummary(prompt, data, **kwargs):
   if client is None:
     return "Error: El cliente de la API de Google no se pudo inicializar. Revisa los logs del servidor."
   if not prompt:
