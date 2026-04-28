@@ -5,6 +5,7 @@ from anvil import tableau
 # Los tipos de Tableau como Mark y DataTable son parte del módulo anvil.tableau
 from trexjacket.api import get_dashboard
 dashboard = get_dashboard()
+import time
 
 class client_code(client_codeTemplate):
   def __init__(self, **properties):
@@ -38,20 +39,55 @@ class client_code(client_codeTemplate):
     self.summary.text = result
     self.summary.visible = True
     self._data = None # Clear data after use
-    # Optional: Clear user question after successful submission
-    # self.user_question.text = ''
 
-  def handle_error(self, error):
+  def handle_error(self, error, prompt, data_to_send, attempt):
     """Callback for server error."""
-    if hasattr(self, 'loading_indicator'):
-      self.loading_indicator.visible = False
-    # Check if it's an Anvil TimeoutError specifically
-    if isinstance(error, anvil.server.TimeoutError):
-      self.summary.text = f"La operación tardó demasiado en completarse. Por favor, intenta con menos datos o una pregunta más específica. Error: {str(error)}"
+    MAX_RETRIES = 3
+
+    if attempt < MAX_RETRIES:
+      # Notificación inicial del error
+      Notification(f"Intento {attempt} fallido. Reintentando...", style="warning", timeout=2).show()
+
+      # Cuenta regresiva visual en el loading_indicator
+      for i in range(5, 0, -1):
+        if hasattr(self, 'loading_indicator'):
+          self.loading_indicator.visible = True
+          self.loading_indicator.text = f"Error de conexión. Reintentando en {i} segundos..."
+        time.sleep(1) # Anvil permite sleep en el cliente sin bloquear el navegador por completo
+
+        # Realizar el siguiente intento
+      self.make_analysis_request(prompt, data_to_send, attempt + 1)
     else:
-      self.summary.text = f"Ocurrió un error al comunicarse con el servidor:\n{str(error)}"
-    self.summary.visible = True
-    self._data = None # Clear data even on error
+      if hasattr(self, 'loading_indicator'):
+        self.loading_indicator.visible = False
+
+      if isinstance(error, anvil.server.TimeoutError):
+        self.summary.text = f"La operación falló tras {MAX_RETRIES} intentos por exceso de tiempo. Por favor, intenta con menos datos."
+      else:
+        self.summary.text = f"Ocurrió un error persistente tras {MAX_RETRIES} intentos:\n{str(error)}"
+      self.summary.visible = True
+      self._data = None
+
+  def make_analysis_request(self, prompt, data_to_send, attempt=1):
+    """Encapsula la llamada al servidor con lógica de reintento."""
+    if hasattr(self, 'loading_indicator'):
+      self.loading_indicator.text = f"Procesando (Intento {attempt}/3)..."
+      self.loading_indicator.visible = True
+
+    server_call_result = anvil.server.call('generateDataSummary', prompt=prompt, data=data_to_send)
+
+    if hasattr(server_call_result, 'then') and callable(server_call_result.then):
+      server_call_result.then(
+        lambda result: self.handle_success(result)
+      ).catch(
+        lambda error: self.handle_error(error, prompt, data_to_send, attempt)
+      )
+    else:
+      # Si la respuesta no es una promesa, manejamos el resultado directo
+      if isinstance(server_call_result, str) and server_call_result.startswith("Error"):
+        self.handle_error(server_call_result, prompt, data_to_send, attempt)
+      else:
+        self.handle_success(server_call_result)
 
   def btn_submit_click(self, **event_args):
     """This method is called when the button is clicked"""
@@ -122,23 +158,11 @@ class client_code(client_codeTemplate):
       Notification("Por favor, ingresa una pregunta antes de analizar los datos.", style="warning", timeout=3).show()
       return
 
-    # Show loading indicator
-    if hasattr(self, 'loading_indicator'):
-      self.loading_indicator.text = "Procesando, por favor espera..."
-      self.loading_indicator.visible = True
     self.summary.visible = False # Hide previous summary
 
-    # Make an asynchronous call to the server with an increased timeout
-    anvil.server.call(
-      'generateDataSummary',
-      prompt=self.user_question.text,
-      data=data_to_send,
-      # timeout=120 # Removed timeout as it's causing TypeError in server function
-    ).then(
-      lambda result: self.handle_success(result)
-    ).catch(
-      lambda error: self.handle_error(error)
-    )
+    # Iniciar la cadena de peticiones con el primer intento
+    self.make_analysis_request(self.user_question.text, data_to_send, attempt=1)
+
   def btn_clear_click(self, **event_args):
     """This method is called when the button is clicked"""
     self.summary.text = ''
